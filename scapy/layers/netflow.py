@@ -188,6 +188,103 @@ bind_layers(NetflowRecordV5, NetflowRecordV5)
 # NetflowV9 RFC
 # https://www.ietf.org/rfc/rfc3954.txt
 
+NetflowV9IpFixFieldsMapping = {
+    "IN_BYTES": ("octetDeltaCount", "2.6.0"),
+    "IN_PKTS": ("packetDeltaCount", "2.6.0"),
+    "FLOWS": ("deltaFlowCount", "2.6.0"),
+    "PROTOCOL": ("protocolIdentifier", "2.6.0"),
+    "SRC_TOS": ("ipClassOfService", "2.6.0"),
+    "TCP_FLAGS": ("tcpControlBits", "2.6.0"),
+    "L4_SRC_PORT": ("sourceTransportPort", "2.6.0"),
+    "IPV4_SRC_ADDR": ("sourceIPv4Address", "2.6.0"),
+    "SRC_MASK": ("sourceIPv4PrefixLength", "2.6.0"),
+    "INPUT_SNMP": ("ingressInterface", "2.6.0"),
+    "L4_DST_PORT": ("destinationTransportPort", "2.6.0"),
+    "IPV4_DST_ADDR": ("destinationIPv4Address", "2.6.0"),
+    "DST_MASK": ("destinationIPv4PrefixLength", "2.6.0"),
+    "OUTPUT_SNMP": ("egressInterface", "2.6.0"),
+    "IPV4_NEXT_HOP": ("ipNextHopIPv4Address", "2.6.0"),
+    "SRC_AS": ("bgpSourceAsNumber", "2.6.0"),
+    "DST_AS": ("bgpDestinationAsNumber", "2.6.0"),
+    "BGP_IPV4_NEXT_HOP": ("bgpNextHopIPv4Address", "2.6.0"),
+    "MUL_DST_PKTS": ("postMCastPacketDeltaCount", "2.6.0"),
+    "MUL_DST_BYTES": ("postMCastOctetDeltaCount", "2.6.0"),
+    "LAST_SWITCHED": ("flowEndSysUpTime", "2.6.0"),
+    "FIRST_SWITCHED": ("flowStartSysUpTime", "2.6.0"),
+    "OUT_BYTES": ("postOctetDeltaCount", "2.6.0"),
+    "OUT_PKTS": ("postPacketDeltaCount", "2.6.0"),
+    "MIN_PKT_LNGTH": ("minimumIpTotalLength", "2.6.0"),
+    "MAX_PKT_LNGTH": ("maximumIpTotalLength", "2.6.0"),
+    "IPV6_SRC_ADDR": ("sourceIPv6Address", "2.6.0"),
+    "IPV6_DST_ADDR": ("destinationIPv6Address", "2.6.0"),
+    "IPV6_SRC_MASK": ("sourceIPv6PrefixLength", "2.6.0"),
+    "IPV6_DST_MASK": ("destinationIPv6PrefixLength", "2.6.0"),
+    "IPV6_FLOW_LABEL": ("flowLabelIPv6", "2.6.0"),
+    "ICMP_TYPE": ("icmpTypeCodeIPv4", "2.6.0"),
+    "MUL_IGMP_TYPE": ("igmpType", "2.6.0"),
+    "SAMPLING_INTERVAL": ("samplingInterval", "2.6.0"),
+    "SAMPLING_ALGORITHM": ("samplingAlgorithm", "2.6.0"),
+    "FLOW_ACTIVE_TIMEOUT": ("flowActiveTimeout", "2.6.0"),
+    "FLOW_INACTIVE_TIMEOUT": ("flowIdleTimeout", "2.6.0"),
+    "ENGINE_TYPE": ("engineType", "2.6.0"),
+    "ENGINE_ID": ("engineId", "2.6.0"),
+    "TOTAL_BYTES_EXP": ("exportedOctetTotalCount", "2.6.0"),
+    "TOTAL_PKTS_EXP": ("exportedMessageTotalCount", "2.6.0"),
+    "TOTAL_FLOWS_EXP": ("exportedFlowRecordTotalCount", "2.6.0"),
+    "IPV4_SRC_PREFIX": ("sourceIPv4Prefix", "2.6.0"),
+    "IPV4_DST_PREFIX": ("destinationIPv4Prefix", "2.6.0"),
+    "MPLS_TOP_LABEL_TYPE": ("mplsTopLabelType", "2.6.0"),
+    "MPLS_TOP_LABEL_IP_ADDR": ("mplsTopLabelIPv4Address", "2.6.0"),
+    "FLOW_SAMPLER_ID": ("samplerId", "2.6.0"),
+    "FLOW_SAMPLER_MODE": ("samplerMode", "2.6.0"),
+    "FLOW_SAMPLER_RANDOM_INTERVAL": ("samplerRandomInterval", "2.6.0"),
+    "MIN_TTL": ("minimumTTL", "2.6.0"),
+    "MAX_TTL": ("maximumTTL", "2.6.0"),
+    "IPV4_IDENT": ("fragmentIdentification", "2.6.0"),
+    "DST_TOS": ("postIpClassOfService", "2.6.0"),
+    "IN_SRC_MAC": ("sourceMacAddress", "2.6.0"),
+    "OUT_DST_MAC": ("postDestinationMacAddress", "2.6.0"),
+    "SRC_VLAN": ("vlanId", "2.6.0"),
+    "DST_VLAN": ("postVlanId", "2.6.0"),
+    "IP_PROTOCOL_VERSION": ("ipVersion", "2.6.0"),
+    "DIRECTION": ("flowDirection", "2.6.0"),
+    "IPV6_NEXT_HOP": ("ipNextHopIPv6Address", "2.6.0"),
+    "BPG_IPV6_NEXT_HOP": ("bgpNextHopIPv6Address", "2.6.0"),
+    "IPV6_OPTION_HEADERS": ("ipv6ExtensionHeaders", "2.6.0"),
+    "MPLS_LABEL_1": ("mplsTopLabelStackSection", "2.6.0"),
+    "MPLS_LABEL_2": ("mplsLabelStackSection2", "2.6.0"),
+    "MPLS_LABEL_3": ("mplsLabelStackSection3", "2.6.0"),
+    "MPLS_LABEL_4": ("mplsLabelStackSection4", "2.6.0"),
+    "MPLS_LABEL_5": ("mplsLabelStackSection5", "2.6.0"),
+    "MPLS_LABEL_6": ("mplsLabelStackSection6", "2.6.0"),
+    "MPLS_LABEL_7": ("mplsLabelStackSection7", "2.6.0"),
+    "MPLS_LABEL_8": ("mplsLabelStackSection8", "2.6.0"),
+    "MPLS_LABEL_9": ("mplsLabelStackSection9", "2.6.0"),
+    "MPLS_LABEL_10": ("mplsLabelStackSection10", "2.6.0"),
+    "IN_DST_MAC": ("destinationMacAddress", "2.6.0"),
+    "OUT_SRC_MAC": ("postSourceMacAddress", "2.6.0"),
+    "IF_NAME": ("interfaceName", "2.6.0"),
+    "IF_DESC": ("interfaceDescription", "2.6.0"),
+    "SAMPLER_NAME": ("samplerName", "2.6.0"),
+    "IN_PERMANENT_BYTES": ("octetTotalCount", "2.6.0"),
+    "IN_PERMANENT_PKTS": ("packetTotalCount", "2.6.0"),
+    "FRAGMENT_OFFSET": ("fragmentOffset", "2.6.0"),
+    "FORWARDINGSTATUS": ("forwardingStatus", "2.6.0"),
+    "MPLSPALRD": ("mplsVpnRouteDistinguisher", "2.6.0"),
+    "MPLSPREFIXLEN": ("mplsTopLabelPrefixLength", "2.6.0"),
+    "SRCTRAFFICINDEX": ("srcTrafficIndex", "2.6.0"),
+    "DSTTRAFFICINDEX": ("dstTrafficIndex", "2.6.0"),
+    "APPLICATIONDESCRIPTION": ("applicationDescription", "2.6.0"),
+    "APPLICATIONTAG": ("applicationId", "2.6.0"),
+    "APPLICATIONNAME": ("applicationName", "2.6.0"),
+    "postipDiffServCodePoint": ("postIpDiffServCodePoint", "2.6.0"),
+    "replicationfactor": ("multicastReplicationFactor", "2.6.0"),
+    "DEPRECATED": ("className", "2.6.0"),
+    "layer2packetSectionOffset": ("layer2packetSectionOffset", "2.6.0"),
+    "layer2packetSectionSize": ("layer2packetSectionSize", "2.6.0"),
+    "layer2packetSectionData": ("layer2packetSectionData", "2.6.0")
+}
+
 # IPFix RFC
 # https://tools.ietf.org/html/rfc5101
 # https://tools.ietf.org/html/rfc5655
@@ -1410,6 +1507,7 @@ def _GenNetflowRecordV9(cls, lengths_list):
     class NetflowRecordV9I(cls):
         fields_desc = _fields_desc
         match_subclass = True
+        deprecated_fields = NetflowV9IpFixFieldsMapping
     NetflowRecordV9I.name = cls.name
     NetflowRecordV9I.__name__ = cls.__name__
     return NetflowRecordV9I
@@ -1446,6 +1544,7 @@ def GetNetflowRecordV9(flowset, templateID=None):
 class NetflowRecordV9(Packet):
     name = "Netflow DataFlowset Record V9/10"
     fields_desc = [StrField("fieldValue", "")]
+    deprecated_fields = NetflowV9IpFixFieldsMapping
 
     def default_payload_class(self, p):
         return conf.padding_layer
