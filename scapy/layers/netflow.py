@@ -1475,31 +1475,39 @@ class _CustomStrFixedLenField(StrFixedLenField):
         return repr(v)
 
 
-def _GenNetflowRecordV9(cls, lengths_list):
+def _GenNetflowRecordV9(cls, lengths_list, scope_lengths_list = None):
     """Internal function used to generate the Records from
     their template.
     """
     _fields_desc = []
-    for j, k in lengths_list:
-        _f_data = NetflowV9TemplateFieldDecoders.get(k, None)
+    if scope_lengths_list:
+        for scopeFieldLength, scopeFieldType in scope_lengths_list:
+            _fields_desc.append(
+                 _CustomStrFixedLenField(
+                    ScopeFieldTypes.get(scopeFieldType, "unknown_data"),
+                    b"", length=scopeFieldLength
+                )
+            )
+    for fieldLength, fieldType in lengths_list:
+        _f_data = NetflowV9TemplateFieldDecoders.get(fieldType, None)
         _f_type, _f_args = (
             _f_data if isinstance(_f_data, tuple) else (_f_data, [])
         )
         _f_kwargs = {}
         if _f_type:
             if issubclass(_f_type, _AdjustableNetflowField):
-                _f_kwargs["length"] = j
+                _f_kwargs["length"] = fieldLength
             _fields_desc.append(
                 _f_type(
-                    NetflowV910TemplateFieldTypes.get(k, "unknown_data"),
+                    NetflowV910TemplateFieldTypes.get(fieldType, "unknown_data"),
                     0, *_f_args, **_f_kwargs
                 )
             )
         else:
             _fields_desc.append(
                 _CustomStrFixedLenField(
-                    NetflowV910TemplateFieldTypes.get(k, "unknown_data"),
-                    b"", length=j
+                    NetflowV910TemplateFieldTypes.get(fieldType, "unknown_data"),
+                    b"", length=fieldLength
                 )
             )
 
@@ -1520,13 +1528,25 @@ def GetNetflowRecordV9(flowset, templateID=None):
     Have a look at the online doc for examples.
     """
     definitions = {}
-    for ntv9 in flowset.templates:
-        llist = []
-        for tmpl in ntv9.template_fields:
-            llist.append((tmpl.fieldLength, tmpl.fieldType))
-        if llist:
-            cls = _GenNetflowRecordV9(NetflowRecordV9, llist)
-            definitions[ntv9.templateID] = cls
+    if flowset.flowSetID == 0:
+        for ntv9 in flowset.templates:
+            llist = []
+            for tmpl in ntv9.template_fields:
+                llist.append((tmpl.fieldLength, tmpl.fieldType))
+            if llist:
+                cls = _GenNetflowRecordV9(NetflowRecordV9, llist)
+                definitions[ntv9.templateID] = cls
+    elif flowset.flowSetID ==1:
+        for optn_ntv9 in flowset.templates:
+            scope_llist = []
+            option_llist = []
+            for tmpl in optn_ntv9.scopes:
+                scope_llist.append((tmpl.scopeFieldlength, tmpl.scopeFieldType))
+            for tmpl in optn_ntv9.options:
+                option_llist.append((tmpl.optionFieldlength, tmpl.optionFieldType))
+            if scope_llist or option_llist:
+                cls = _GenNetflowRecordV9(NetflowRecordV9, option_llist, scope_llist)
+                definitions[optn_ntv9.templateID] = cls
     if not definitions:
         raise Scapy_Exception(
             "No template IDs detected"
