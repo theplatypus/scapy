@@ -188,6 +188,112 @@ bind_layers(NetflowRecordV5, NetflowRecordV5)
 # NetflowV9 RFC
 # https://www.ietf.org/rfc/rfc3954.txt
 
+
+NetflowV9TemplateFieldTypes = {
+    1: "IN_BYTES",
+    2: "IN_PKTS",
+    3: "FLOWS",
+    4: "PROTOCOL",
+    5: "SRC_TOS",
+    6: "TCP_FLAGS",
+    7: "L4_SRC_PORT",
+    8: "IPV4_SRC_ADDR",
+    9: "SRC_MASK",
+    10: "INPUT_SNMP",
+    11: "L4_DST_PORT",
+    12: "IPV4_DST_ADDR",
+    13: "DST_MASK",
+    14: "OUTPUT_SNMP",
+    15: "IPV4_NEXT_HOP",
+    16: "SRC_AS",
+    17: "DST_AS",
+    18: "BGP_IPV4_NEXT_HOP",
+    19: "MUL_DST_PKTS",
+    20: "MUL_DST_BYTES",
+    21: "LAST_SWITCHED",
+    22: "FIRST_SWITCHED",
+    23: "OUT_BYTES",
+    24: "OUT_PKTS",
+    25: "MIN_PKT_LNGTH",
+    26: "MAX_PKT_LNGTH",
+    27: "IPV6_SRC_ADDR",
+    28: "IPV6_DST_ADDR",
+    29: "IPV6_SRC_MASK",
+    30: "IPV6_DST_MASK",
+    31: "IPV6_FLOW_LABEL",
+    32: "ICMP_TYPE",
+    33: "MUL_IGMP_TYPE",
+    34: "SAMPLING_INTERVAL",
+    35: "SAMPLING_ALGORITHM",
+    36: "FLOW_ACTIVE_TIMEOUT",
+    37: "FLOW_INACTIVE_TIMEOUT",
+    38: "ENGINE_TYPE",
+    39: "ENGINE_ID",
+    40: "TOTAL_BYTES_EXP",
+    41: "TOTAL_PKTS_EXP",
+    42: "TOTAL_FLOWS_EXP",
+    43: "*VendorProprietary*",
+    44: "IPV4_SRC_PREFIX",
+    45: "IPV4_DST_PREFIX",
+    46: "MPLS_TOP_LABEL_TYPE",
+    47: "MPLS_TOP_LABEL_IP_ADDR",
+    48: "FLOW_SAMPLER_ID",
+    49: "FLOW_SAMPLER_MODE",
+    50: "FLOW_SAMPLER_RANDOM_INTERVAL",
+    52: "MIN_TTL",
+    53: "MAX_TTL",
+    54: "IPV4_IDENT",
+    55: "DST_TOS",
+    56: "IN_SRC_MAC",
+    57: "OUT_DST_MAC",
+    58: "SRC_VLAN",
+    59: "DST_VLAN",
+    60: "IP_PROTOCOL_VERSION",
+    61: "DIRECTION",
+    62: "IPV6_NEXT_HOP",
+    63: "BPG_IPV6_NEXT_HOP",
+    64: "IPV6_OPTION_HEADERS",
+    65: "*VendorProprietary*",
+    66: "*VendorProprietary*",
+    67: "*VendorProprietary*",
+    68: "*VendorProprietary*",
+    69: "*VendorProprietary*",
+    70: "MPLS_LABEL_1",
+    71: "MPLS_LABEL_2",
+    72: "MPLS_LABEL_3",
+    73: "MPLS_LABEL_4",
+    74: "MPLS_LABEL_5",
+    75: "MPLS_LABEL_6",
+    76: "MPLS_LABEL_7",
+    77: "MPLS_LABEL_8",
+    78: "MPLS_LABEL_9",
+    79: "MPLS_LABEL_10",
+    80: "IN_DST_MAC",
+    81: "OUT_SRC_MAC",
+    82: "IF_NAME",
+    83: "IF_DESC",
+    84: "SAMPLER_NAME",
+    85: "IN_PERMANENT_BYTES",
+    86: "IN_PERMANENT_PKTS",
+    87: "*VendorProprietary*",
+    88: "FRAGMENT_OFFSET",
+    89: "FORWARDINGSTATUS",
+    90: "MPLSPALRD",
+    91: "MPLSPREFIXLEN",
+    92: "SRCTRAFFICINDEX",
+    93: "DSTTRAFFICINDEX",
+    94: "APPLICATIONDESCRIPTION",
+    95: "APPLICATIONTAG",
+    96: "APPLICATIONNAME",
+    98: "postipDiffServCodePoint",
+    99: "replicationfactor",
+    100: "DEPRECATED",
+    102: "layer2packetSectionOffset",
+    103: "layer2packetSectionSize",
+    104: "layer2packetSectionData",
+
+}
+
 NetflowV9IpFixFieldsMapping = {
     "IN_BYTES": ("octetDeltaCount", "2.6.0"),
     "IN_PKTS": ("packetDeltaCount", "2.6.0"),
@@ -1226,6 +1332,7 @@ NetflowV9TemplateFieldDefaultLengths = {
 # NetflowV9 Ready-made fields
 
 
+
 class ShortOrInt(IntField):
     def getfield(self, pkt, x):
         if len(x) == 2:
@@ -1428,11 +1535,32 @@ class NetflowHeaderV10(Packet):
         return pkt + pay
 
 
+# if isinstance(enum, tuple):
+#             self.i2s_cb = enum[0]  # type: Optional[Callable[[I], str]]
+#             self.s2i_cb = enum[1]  # type: Optional[Callable[[str], I]]
+#             self.i2s = None  # type: Optional[Dict[I, str]]
+#             self.s2i = None  # type: Optional[Dict[str, I]]
+
+i2s = lambda i: NetflowV910TemplateFieldTypes[i]
+
+def merge_two_dicts(x, y):
+    z = x.copy()   # start with keys and values of x
+    z.update(y)    # modifies z with keys and values of y
+    return z
+
+
+z = merge_two_dicts(
+    {v: k for k, v in NetflowV910TemplateFieldTypes.items()} , 
+    {v: k for k, v in NetflowV9TemplateFieldTypes.items()} )
+
+s2i = lambda s: z[s]
+
 class NetflowTemplateFieldV9(Packet):
     name = "Netflow Flowset Template Field V9/10"
     fields_desc = [BitField("enterpriseBit", 0, 1),
                    BitEnumField("fieldType", None, 15,
-                                NetflowV910TemplateFieldTypes),
+                                # NetflowV910TemplateFieldTypes),
+                                (i2s, s2i)),
                    ShortField("fieldLength", None),
                    ConditionalField(IntField("enterpriseNumber", 0),
                                     lambda p: p.enterpriseBit)]
@@ -1518,6 +1646,9 @@ def _GenNetflowRecordV9(cls, lengths_list, scope_lengths_list = None):
         deprecated_fields = NetflowV9IpFixFieldsMapping
     NetflowRecordV9I.name = cls.name
     NetflowRecordV9I.__name__ = cls.__name__
+    # NetflowRecordV9I.deprecated_fields = NetflowV9IpFixFieldsMapping
+    # print(NetflowRecordV9I)
+    # NetflowRecordV9I.class_dont_cache[NetflowRecordV9I.name] = True
     return NetflowRecordV9I
 
 
@@ -1775,13 +1906,16 @@ class NetflowOptionsFlowsetOptionV9(Packet):
     name = "Netflow Options Template FlowSet V9/10 - Option"
     fields_desc = [BitField("enterpriseBit", 0, 1),
                    BitEnumField("optionFieldType", None, 15,
-                                NetflowV910TemplateFieldTypes),
+                                (i2s, s2i)),
+                                # NetflowV9TemplateFieldTypes),
+                                # NetflowV910TemplateFieldTypes),
                    ShortField("optionFieldlength", 0),
                    ConditionalField(ShortField("enterpriseNumber", 0),
                                     lambda p: p.enterpriseBit)]
 
     def default_payload_class(self, p):
         return conf.padding_layer
+
 
 
 # Aka Set
@@ -1828,6 +1962,72 @@ class NetflowOptionsFlowsetV9(Packet):
             pkt = pkt[:2] + struct.pack("!H", len(pkt)) + pkt[4:]
         return pkt + pay
 
+
+
+
+# class NetflowOptionTemplateV9(Packet):
+#     name = "Netflow Flowset Template V9/10"
+#     fields_desc = [ShortField("templateID", 255),
+#                    FieldLenField("option_scope_length", None,
+#                                  length_of="scopes"),
+#                    FieldLenField("option_field_length", None,
+#                                  length_of="options"),
+#                    # We can't use PadField as we have 2 PacketListField
+#                    PacketListField(
+#                        "scopes", [],
+#                        NetflowOptionsFlowsetScopeV9,
+#                        length_from=lambda pkt: pkt.option_scope_length),
+#                    PacketListField(
+#                        "options", [],
+#                        NetflowOptionsFlowsetOptionV9,
+#                        length_from=lambda pkt: pkt.option_field_length)]
+
+#     def default_payload_class(self, p):
+#         return conf.padding_layer
+
+
+# # class NetflowFlowsetV9(Packet):
+# #     name = "Netflow FlowSet V9/10"
+# #     fields_desc = [ShortField("flowSetID", 1),
+# #                    FieldLenField("length", None, length_of="templates",
+# #                                  adjust=lambda pkt, x:x + 4),
+# #                    ]
+
+
+# class NetflowOptionsFlowsetV9(Packet):
+#     name = "Netflow Options Template FlowSet V9"
+#     fields_desc = [ShortField("flowSetID", 1),
+#                    ShortField("length", None),
+#                    PacketListField("templates", [], NetflowOptionTemplateV9,
+#                                    length_from=lambda pkt: pkt.length - 4),
+#                    StrLenField("pad", None, length_from=lambda pkt: (
+#                        pkt.length - pkt.option_scope_length -
+#                        pkt.option_field_length - 10))]
+
+#     def default_payload_class(self, p):
+#         return conf.padding_layer
+
+#     def post_build(self, pkt, pay):
+#         if self.pad is None:
+#             # Padding 4-bytes with b"\x00"
+#             start = 10 + self.option_scope_length + self.option_field_length
+#             pkt = pkt[:start] + (-len(pkt) % 4) * b"\x00"
+#         if self.length is None:
+#             pkt = pkt[:2] + struct.pack("!H", len(pkt)) + pkt[4:]
+#         return pkt + pay
+
+
+# class NetflowOptionsFlowsetOptionV10(Packet):
+#     name = "Netflow Options Template FlowSet V10 - Option"
+#     fields_desc = [BitField("enterpriseBit", 0, 1),
+#                    BitEnumField("optionFieldType", None, 15,
+#                                 NetflowV910TemplateFieldTypes),
+#                    ShortField("optionFieldlength", 0),
+#                    ConditionalField(ShortField("enterpriseNumber", 0),
+#                                     lambda p: p.enterpriseBit)]
+
+#     def default_payload_class(self, p):
+#         return conf.padding_layer
 
 # https://tools.ietf.org/html/rfc5101#section-3.4.2.2
 class NetflowOptionsFlowset10(NetflowOptionsFlowsetV9):
