@@ -1541,7 +1541,7 @@ class NetflowHeaderV10(Packet):
 #             self.i2s = None  # type: Optional[Dict[I, str]]
 #             self.s2i = None  # type: Optional[Dict[str, I]]
 
-i2s = lambda i: NetflowV910TemplateFieldTypes[i]
+i2s = lambda i: NetflowV910TemplateFieldTypes.get(i, "unknown")
 
 def merge_two_dicts(x, y):
     z = x.copy()   # start with keys and values of x
@@ -1659,25 +1659,14 @@ def GetNetflowRecordV9(flowset, templateID=None):
     Have a look at the online doc for examples.
     """
     definitions = {}
-    if flowset.flowSetID == 0:
-        for ntv9 in flowset.templates:
-            llist = []
-            for tmpl in ntv9.template_fields:
-                llist.append((tmpl.fieldLength, tmpl.fieldType))
-            if llist:
-                cls = _GenNetflowRecordV9(NetflowRecordV9, llist)
-                definitions[ntv9.templateID] = cls
-    elif flowset.flowSetID ==1:
-        for optn_ntv9 in flowset.templates:
-            scope_llist = []
-            option_llist = []
-            for tmpl in optn_ntv9.scopes:
-                scope_llist.append((tmpl.scopeFieldlength, tmpl.scopeFieldType))
-            for tmpl in optn_ntv9.options:
-                option_llist.append((tmpl.optionFieldlength, tmpl.optionFieldType))
-            if scope_llist or option_llist:
-                cls = _GenNetflowRecordV9(NetflowRecordV9, option_llist, scope_llist)
-                definitions[optn_ntv9.templateID] = cls
+    # if flowset.flowSetID == 0:
+    for ntv9 in flowset.templates:
+        llist = []
+        for tmpl in ntv9.template_fields:
+            llist.append((tmpl.fieldLength, tmpl.fieldType))
+        if llist:
+            cls = _GenNetflowRecordV9(NetflowRecordV9, llist)
+            definitions[ntv9.templateID] = cls
     if not definitions:
         raise Scapy_Exception(
             "No template IDs detected"
@@ -1690,6 +1679,24 @@ def GetNetflowRecordV9(flowset, templateID=None):
         return definitions[templateID]
     else:
         return list(definitions.values())[0]
+
+def GetNetflowOptionRecordV9(flowset):
+
+    # unique option template at the moment
+    # for optn_ntv9 in flowset.templates:
+    scope_llist = []
+    option_llist = []
+    for tmpl in flowset.scopes:
+        scope_llist.append((tmpl.scopeFieldlength, tmpl.scopeFieldType))
+    for tmpl in flowset.options:
+        option_llist.append((tmpl.optionFieldlength, tmpl.optionFieldType))
+    if scope_llist or option_llist:
+        cls = _GenNetflowRecordV9(NetflowRecordV9, option_llist, scope_llist)
+        return cls
+    else:
+        raise Scapy_Exception(
+            "No Field definition found"
+        )
 
 
 class NetflowRecordV9(Packet):
@@ -1929,6 +1936,8 @@ class NetflowOptionsFlowsetScopeV9(Packet):
 
 
 class NetflowOptionsFlowsetV9(Packet):
+    # Warning ; Implementation deviates from RFC 3954,
+    # according to which several templates MAY be present.
     name = "Netflow Options Template FlowSet V9"
     fields_desc = [ShortField("flowSetID", 1),
                    ShortField("length", None),
@@ -2075,6 +2084,10 @@ bind_layers(NetflowHeaderV9, NetflowDataflowsetV9)
 bind_layers(NetflowDataflowsetV9, NetflowDataflowsetV9)
 bind_layers(NetflowOptionsFlowsetV9, NetflowDataflowsetV9)
 bind_layers(NetflowFlowsetV9, NetflowDataflowsetV9)
+
+# bind_layers(NetflowHeaderV9, NetflowFlowsetV9)
+# bind_layers(NetflowHeaderV9, NetflowOptionsFlowsetV9)
+
 
 # Apart from the first header, IPFix and NetflowV9 have the same format
 # (except the Options Template)
