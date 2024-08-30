@@ -123,6 +123,19 @@ dataFS = NetflowDataflowsetV9(
     ],
 )
 
+# dataFS = NetflowDataflowsetV9(
+#     templateID=256,
+#     records=[ # Some random data.
+#         recordClass(
+#             octetDeltaCount=b"\x12",
+#             packetDeltaCount=b"\0\0\0\0",
+#             protocolIdentifier=6,
+#             sourceIPv4Address="192.168.0.10",
+#             destinationIPv4Address="192.168.0.11"
+#         ),
+#     ],
+# )
+
 pkt = netflow_header / flowset / dataFS
 assert raw(pkt) == b'\x00\t\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x1c\x01\x00\x00\x05\x00\x01\x00\x01\x00\x02\x00\x04\x00\x04\x00\x01\x00\x08\x00\x04\x00\x0c\x00\x04\x01\x00\x00\x14\x12\x00\x00\x00\x00\x06\xc0\xa8\x00\n\xc0\xa8\x00\x0b\x00\x00'
 
@@ -159,18 +172,35 @@ assert raw(pkt) == dat
 = NetflowV9 - Options Template build
 ~ netflow
 
+# option_templateFlowSet_256 = NetflowOptionsFlowsetV9(
+#     templates=[ NetflowOptionTemplateV9(
+#         templateID = 256,
+#         option_scope_length = 4*1,
+#         option_field_length = 4*3,
+#         scopes = [
+#             NetflowOptionsFlowsetScopeV9(scopeFieldType=1,	scopeFieldlength= 4),
+#         ],
+#         options = [
+#             NetflowOptionsFlowsetOptionV9(optionFieldType= 10,	optionFieldlength= 4),
+#             NetflowOptionsFlowsetOptionV9(optionFieldType= 82,	optionFieldlength= 32),
+#             NetflowOptionsFlowsetOptionV9(optionFieldType= 83,	optionFieldlength= 240)
+#         ]
+#     )])
+
 option_templateFlowSet_256 = NetflowOptionsFlowsetV9(
-    templateID = 256,
-    option_scope_length = 4*1,
-    option_field_length = 4*3,
-    scopes = [
-        NetflowOptionsFlowsetScopeV9(scopeFieldType=1,	scopeFieldlength= 4),
-    ],
-    options = [
-        NetflowOptionsFlowsetOptionV9(optionFieldType= 10,	optionFieldlength= 4),
-        NetflowOptionsFlowsetOptionV9(optionFieldType= 82,	optionFieldlength= 32),
-        NetflowOptionsFlowsetOptionV9(optionFieldType= 83,	optionFieldlength= 240)
-    ])
+        templateID = 256,
+        option_scope_length = 4*1,
+        option_field_length = 4*3,
+        scopes = [
+            NetflowOptionsFlowsetScopeV9(scopeFieldType=1,	scopeFieldlength= 4),
+        ],
+        options = [
+            NetflowOptionsFlowsetOptionV9(optionFieldType= 10,	optionFieldlength= 4),
+            NetflowOptionsFlowsetOptionV9(optionFieldType= 82,	optionFieldlength= 32),
+            NetflowOptionsFlowsetOptionV9(optionFieldType= 83,	optionFieldlength= 240)
+        ]
+    )
+
 assert raw(option_templateFlowSet_256) == b'\x00\x01\x00\x1c\x01\x00\x00\x04\x00\x0c\x00\x01\x00\x04\x00\n\x00\x04\x00R\x00 \x00S\x00\xf0\x00\x00'
 
 = NetflowV9 - Advanced build, multiple flowsets and multiple records by flowset
@@ -267,18 +297,42 @@ dataFlowset_2 = NetflowDataflowsetV9(
     ],
 )
 
+Record257(raw(Record257(
+            IN_BYTES=b"\x12",
+            IN_PKTS=b"\x12\x12",
+            PROTOCOL=1,
+            IPV6_SRC_ADDR="2001:db8:3333:4444:5555:6666:7777:8888",
+            IPV6_DST_ADDR="2001:db8::"
+        )))
+
 # An option template flowset, containing an unique template
+# opttmpl258_flowSet = NetflowOptionsFlowsetV9(
+#     templates=[ NetflowOptionTemplateV9(
+#         templateID = 258,
+#         option_scope_length = 4*1,
+#         option_field_length = 4*2,
+#         scopes = [
+#             NetflowOptionsFlowsetScopeV9(scopeFieldType= 1,	scopeFieldlength= 4),
+#         ],
+#         options = [
+#             NetflowOptionsFlowsetOptionV9(optionFieldType= 34,	optionFieldlength= 4),
+#             NetflowOptionsFlowsetOptionV9(optionFieldType= 35,	optionFieldlength= 1)
+#         ]    
+#     )]
+# )
+
 opttmpl258_flowSet = NetflowOptionsFlowsetV9(
     templateID = 258,
     option_scope_length = 4*1,
     option_field_length = 4*2,
     scopes = [
-        NetflowOptionsFlowsetScopeV9(scopeFieldType= 1,	scopeFieldlength= 4),
+        NetflowOptionsFlowsetScopeV9(scopeFieldType=1,	scopeFieldlength= 4),
     ],
     options = [
         NetflowOptionsFlowsetOptionV9(optionFieldType= 34,	optionFieldlength= 4),
         NetflowOptionsFlowsetOptionV9(optionFieldType= 35,	optionFieldlength= 1)
-    ])
+    ]
+)
 
 # And finally a Record class for #258 Options
 class Record_258(NetflowRecordV9):
@@ -287,9 +341,13 @@ class Record_258(NetflowRecordV9):
         IntField("System", 0),
         IntField("SAMPLING_INTERVAL", 4),
         XByteField("SAMPLING_ALGORITHM", 1)
+        # IntField("samplingInterval", 4),
+        # XByteField("samplingAlgorithm", 1)
     ]
     match_subclass = True
 
+# Record_258 = GetNetflowRecordV9(opttmpl258_flowSet)
+Record_258 = GetNetflowOptionRecordV9(opttmpl258_flowSet)
 
 # with a record Flowset
 optiondataFlowset = NetflowDataflowsetV9(
@@ -302,23 +360,35 @@ optiondataFlowset = NetflowDataflowsetV9(
         ),
         Record_258(
             System=242424,
-            SAMPLING_INTERVAL=1000,
-            SAMPLING_ALGORITHM=0x02
+            samplingInterval=1000,
+            samplingAlgorithm=0x02
         )
     ],
 )
 
 netflow_header = NetflowHeader()/NetflowHeaderV9(unixSecs=1547927349.328283)
-pkt =  netflow_header / template_flowset / opttmpl258_flowSet / dataFlowset_1 / dataFlowset_2 / optiondataFlowset
+pkt =  netflow_header / template_flowset / opttmpl258_flowSet / dataFlowset_1 / dataFlowset_2  / optiondataFlowset
 #      Count: 12      =        2        +         1           +       5       +       2       +        2
 
+# pkt = NetflowHeader(raw(pkt))
+
 assert raw(pkt) == b'\x00\t\x00\x0c\x00\x00\x00\x00\\C\x7f5\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x004\x01\x00\x00\x05\x00\x01\x00\x01\x00\x02\x00\x04\x00\x04\x00\x01\x00\x08\x00\x04\x00\x0c\x00\x04\x01\x01\x00\x05\x00\x01\x00\x01\x00\x02\x00\x04\x00\x04\x00\x01\x00\x1b\x00\x10\x00\x1c\x00\x10\x00\x01\x00\x18\x01\x02\x00\x04\x00\x08\x00\x01\x00\x04\x00"\x00\x04\x00#\x00\x01\x00\x00\x01\x00\x00L\x12\x00\x00\x00\x00\x01\xc0\xa8\x00\n\xc0\xa8\x00\x0b\x0c\x01\x01\x01\x01\x02\xac\x00\x00\n\xac\x00\x00\x0b\x0c\x01\x01\x01\x01\x03\xac\x00\x00\n\xac\x00\x00\x0b\x0c\x01\x01\x01\x01\x04\xac\x00\x00\n\xac\x00\x00\x0b\x0c\x01\x01\x01\x01\x05\xac\x00\x00\n\xac\x00\x00\x0b\x00\x00\x01\x01\x00P\x12\x00\x00\x00\x00\x01 \x01\r\xb833DDUUffww\x88\x88 \x01\r\xb8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x0c\x01\x01\x01\x01\x02 \x01\r\xb833DD\xcc\xcc\xdd\xdd\xee\xee\xff\xff \x01\r\xb8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x00\x18\x00\x06y2\x00\x00\x00d\x01\x00\x03\xb2\xf8\x00\x00\x03\xe8\x02\x00\x00'
+
+# pkt_ = NetflowHeader(raw(pkt))
+
+
+# Record_258(raw(Record_258(
+#             System=pack('!I', 424242),
+#              SAMPLING_INTERVAL=100,
+#            SAMPLING_ALGORITHM=0x01
+#         )))
+
 
 
 = NetflowV9 - Advanced dissection, complete example
 ~ netflow
 
-pkt = NetflowHeader(b'\x00\t\x00\x0c\x00\x00\x00\x00\\C\x7f5\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x004\x01\x00\x00\x05\x00\x01\x00\x01\x00\x02\x00\x04\x00\x04\x00\x01\x00\x08\x00\x04\x00\x0c\x00\x04\x01\x01\x00\x05\x00\x01\x00\x01\x00\x02\x00\x04\x00\x04\x00\x01\x00\x1b\x00\x10\x00\x1c\x00\x10\x00\x01\x00\x18\x01\x02\x00\x04\x00\x08\x00\x01\x00\x04\x00"\x00\x04\x00#\x00\x01\x00\x00\x01\x00\x00L\x12\x00\x00\x00\x00\x01\xc0\xa8\x00\n\xc0\xa8\x00\x0b\x0c\x01\x01\x01\x01\x02\xac\x00\x00\n\xac\x00\x00\x0b\x0c\x01\x01\x01\x01\x03\xac\x00\x00\n\xac\x00\x00\x0b\x0c\x01\x01\x01\x01\x04\xac\x00\x00\n\xac\x00\x00\x0b\x0c\x01\x01\x01\x01\x05\xac\x00\x00\n\xac\x00\x00\x0b\x00\x00\x01\x01\x00P\x12\x00\x00\x00\x00\x01 \x01\r\xb833DDUUffww\x88\x88 \x01\r\xb8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x0c\x01\x01\x01\x01\x02 \x01\r\xb833DD\xcc\xcc\xdd\xdd\xee\xee\xff\xff \x01\r\xb8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x00\x18\x00\x06y2\x00\x00\x00d\x01\x00\x03\xb2\xf8\x00\x00\x03\xe8\x02\x00\x00')
+pkt_ = NetflowHeader(b'\x00\t\x00\x0c\x00\x00\x00\x00\\C\x7f5\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x004\x01\x00\x00\x05\x00\x01\x00\x01\x00\x02\x00\x04\x00\x04\x00\x01\x00\x08\x00\x04\x00\x0c\x00\x04\x01\x01\x00\x05\x00\x01\x00\x01\x00\x02\x00\x04\x00\x04\x00\x01\x00\x1b\x00\x10\x00\x1c\x00\x10\x00\x01\x00\x18\x01\x02\x00\x04\x00\x08\x00\x01\x00\x04\x00"\x00\x04\x00#\x00\x01\x00\x00\x01\x00\x00L\x12\x00\x00\x00\x00\x01\xc0\xa8\x00\n\xc0\xa8\x00\x0b\x0c\x01\x01\x01\x01\x02\xac\x00\x00\n\xac\x00\x00\x0b\x0c\x01\x01\x01\x01\x03\xac\x00\x00\n\xac\x00\x00\x0b\x0c\x01\x01\x01\x01\x04\xac\x00\x00\n\xac\x00\x00\x0b\x0c\x01\x01\x01\x01\x05\xac\x00\x00\n\xac\x00\x00\x0b\x00\x00\x01\x01\x00P\x12\x00\x00\x00\x00\x01 \x01\r\xb833DDUUffww\x88\x88 \x01\r\xb8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x0c\x01\x01\x01\x01\x02 \x01\r\xb833DD\xcc\xcc\xdd\xdd\xee\xee\xff\xff \x01\r\xb8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x00\x18\x00\x06y2\x00\x00\x00d\x01\x00\x03\xb2\xf8\x00\x00\x03\xe8\x02\x00\x00')
 
 nf_header = pkt.getlayer(NetflowHeader)
 assert nf_header.version == 9

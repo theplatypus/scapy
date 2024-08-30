@@ -1610,12 +1610,23 @@ def _GenNetflowRecordV9(cls, lengths_list, scope_lengths_list = None):
     _fields_desc = []
     if scope_lengths_list:
         for scopeFieldLength, scopeFieldType in scope_lengths_list:
-            _fields_desc.append(
-                 _CustomStrFixedLenField(
-                    ScopeFieldTypes.get(scopeFieldType, "unknown_data"),
-                    b"", length=scopeFieldLength
+            scope_field_name = ScopeFieldTypes.get(scopeFieldType, "unknown_data") 
+
+            if scopeFieldLength == 1:
+                _fields_desc.append(ByteField(scope_field_name, b''))
+            elif scopeFieldLength == 2:
+                _fields_desc.append(ShortField(scope_field_name, b''))
+            elif scopeFieldLength == 3:
+                _fields_desc.append(ThreeBytesField(scope_field_name, b''))
+            elif scopeFieldLength == 4:
+                _fields_desc.append(IntField(scope_field_name, b''))
+            else:
+                _fields_desc.append(
+                    _CustomStrFixedLenField(
+                        ScopeFieldTypes.get(scopeFieldType, "unknown_data"),
+                        b"", length=scopeFieldLength
+                    )
                 )
-            )
     for fieldLength, fieldType in lengths_list:
         _f_data = NetflowV9TemplateFieldDecoders.get(fieldType, None)
         _f_type, _f_args = (
